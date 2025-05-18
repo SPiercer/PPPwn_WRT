@@ -25,14 +25,14 @@ while ! ping -c 1 -W 1 "$DNS_CHECK_HOST" >/dev/null 2>&1; do
     ELAPSED=$((ELAPSED + WAIT_INTERVAL))
     if [ "$ELAPSED" -ge "$MAX_WAIT" ]; then
         echo "Network not available after $MAX_WAIT seconds. Exiting..."
-        exit 1
+        #exit 1
     fi
 done
 
 echo "Network is available. Continuing installation..."
 
 
-opkg update || { echo "opkg update failed"; exit 1; }
+opkg update || { echo "opkg update failed"; } #exit 1; }
 opkg install coreutils-timeout
 
 # Remove previous install
@@ -42,13 +42,13 @@ rm -r PPPwn_WRT-main
 mkdir PPPwn_WRT-main
 if [ $? -ne 0 ]; then
     echo "Failed to create directory PPPwn_WRT-main"
-    exit 1
+    #exit 1
 fi
 
 cd PPPwn_WRT-main
 if [ $? -ne 0 ]; then
     echo "Failed to change to directory PPPwn_WRT-main"
-    exit 1
+    #exit 1
 fi
 
 #Add services
@@ -189,7 +189,7 @@ case "$machine_arch" in
         ;;
     *)
         echo "Unsupported architecture: $machine_arch"
-        exit 1
+        #exit 1
         ;;
 esac
 
@@ -278,7 +278,7 @@ lan_ports=$(awk '/^config device$/ {
 
 if [ -z "$lan_ports" ]; then
     echo "Error: No LAN ports found in /etc/config/network under 'config device' with 'option name ${network_interface}'."
-    exit 1
+    #exit 1
 fi
 
 echo "$lan_ports" > "$available_ports_file"
@@ -334,11 +334,11 @@ modified_network_file="./network"
 
 if [ ! -f "$original_network_file" ]; then
     echo "Error: Original network file not found at $original_network_file."
-    exit 1
+    #exit 1
 fi
 if [ ! -f "$selected_ports_file" ]; then
     echo "Error: Selected ports file not found. Run the selection script first."
-    exit 1
+    #exit 1
 fi
 
 selected_ports=$(awk '{gsub(/'\''/, ""); print}' "$selected_ports_file")
@@ -408,7 +408,7 @@ CONFIG_FILE="/etc/config/firewall"
 
 if [ ! -f "$CONFIG_FILE" ]; then
     echo "Error: $CONFIG_FILE does not exist."
-    exit 1
+    #exit 1
 fi
 
 TMP_FILE="${CONFIG_FILE}.tmp"
@@ -514,7 +514,7 @@ echo
         opkg install rp-pppoe-server rp-pppoe-common
         if [ $? -ne 0 ]; then
             echo "Failed to install rp-pppoe-server"
-            exit 1
+            #exit 1
         fi
 
         gateway="192.168.3.1"
@@ -642,7 +642,7 @@ CONFIG_FILE="/etc/config/dhcp"
 
 if [ ! -f "$CONFIG_FILE" ]; then
     echo "Error: $CONFIG_FILE does not exist."
-    exit 1
+    #exit 1
 fi
 
 TMP_FILE="${CONFIG_FILE}.tmp"
