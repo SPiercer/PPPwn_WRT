@@ -517,67 +517,10 @@ echo
             exit 1
         fi
 
-        while true; do
-            read -p "$(printf '\r\n\r\n\033[36mDo you want to change the default subnet?\r\nif you select no then these defaults will be used\r\n\r\nGateway: \033[33m192.168.3.1\r\n\033[36mPS4 IP: \033[33m192.168.3.11\r\n\033[36mGuest IP: \033[33m192.168.3.12\033[33m\r\n\r\n\033[36m(Y|N)?: \033[0m')" pppoecred
-            case "$pppoecred" in
-            [Yy])
-                #Gateway
-                while true; do
-                    read -p "$(printf '\r\n\r\n\033[36mEnter new gateway (192.168.x.x): \033[0m')" gateway
-                    if echo "$gateway" | grep -Eq '^192\.168\.[0-9]{1,3}\.[0-9]{1,3}$'; then
-
-                        third_octet=$(echo "$gateway" | cut -d. -f3)
-                        fourth_octet=$(echo "$gateway" | cut -d. -f4)
-                    
-                        if [ "$third_octet" -ge 1 ] 2>/dev/null && [ "$third_octet" -le 254 ] 2>/dev/null && \
-                        [ "$fourth_octet" -ge 1 ] 2>/dev/null && [ "$fourth_octet" -le 254 ] 2>/dev/null; then
-
-                            remoteip=$(echo "$gateway" | awk -F'.' '{ $4 = $4 + 1; print $1"."$2"."$3"."$4 }')
-                            # Prompt for static IP
-                            while true; do
-                                read -p "$(printf '\r\n\r\n\033[36mEnter the last digit for the PS4 IP (1-254): \033[0m')" static_octet
-
-                                if [ "$static_octet" -ge 1 ] 2>/dev/null && [ "$static_octet" -le 254 ] 2>/dev/null; then
-                                    static_ip="192.168.${third_octet}.${static_octet}"
-                                    echo "PS4 IP set to: $static_ip"
-                                    ps4ip="$static_ip"
-                                    break
-                                else
-                                    echo "Invalid number. Please enter a number between 1 and 254."
-                                fi
-                            done
-                            # Prompt for guest IP
-                            while true; do
-                                read -p "$(printf '\r\n\r\n\033[36mEnter the last digit for the guest IP (1-254): \033[0m')" static_octet
-
-                                if [ "$static_octet" -ge 1 ] 2>/dev/null && [ "$static_octet" -le 254 ] 2>/dev/null; then
-                                    static_ip="192.168.${third_octet}.${static_octet}"
-                                    echo "PS4 IP set to: $static_ip"
-                                    guestip="$static_ip"
-                                    break
-                                else
-                                    echo "Invalid number. Please enter a number between 1 and 254."
-                                fi
-                            done
-                            break
-                        else
-                            echo "Invalid format. Please enter an address in the format 192.168.x.x where x is 1-254."
-                    fi
-                    else
-                        echo "Invalid format. Please enter an address in the format 192.168.x.x where x is 1-254."
-                    fi
-                done
-            break;;
-            [Nn])                
-                gateway="192.168.3.1"
-                remoteip="192.168.3.2"
-                ps4ip="192.168.3.11"
-                guestip="192.168.3.12"
-                break;;
-            *)
-            break;;
-            esac
-        done
+        gateway="192.168.3.1"
+        remoteip="192.168.3.2"
+        ps4ip="192.168.3.11"
+        guestip="192.168.3.12"
         dns_server=$(ifconfig $network_interface | grep 'inet addr' | awk -F: '{print $2}' | awk '{print $1}')
         echo '# PPP options for the PPPoE server
 # LIC: GPL
@@ -614,54 +557,9 @@ config pppoe_relay
 	option maxsessions '64'
 	option timeout '60'' | tee /etc/config/pppoe
 
-        while true; do
-        read -p "$(printf '\r\n\r\n\033[36mDo you want to change the PPPoE username and password?\r\nif you select no then these defaults will be used\r\n\r\nUsername: \033[33mppp\r\n\033[36mPassword: \033[33mppp\r\n\r\n\033[36mGuest Username: \033[33mguest\r\n\033[36mPassword: \033[33mppp\r\n\r\n\033[36m(Y|N)?: \033[0m')" ppp_cred
-        case "$ppp_cred" in
-        [Yy])
-            #Username
-            while true; do
-                read -p "$(printf '\n\033[33mEnter Username: \033[0m')" pppusr
-                case "$pppusr" in
-                    "" )
-                        printf '\033[33mCannot be empty!\033[0m';;
-                    * )
-                    if echo "$pppusr" | grep -q '^[0-9a-zA-Z_ -]*$'; then
-                        if [ ${#pppusr} -le 1 ]  || [ ${#pppusr} -ge 33 ] ; then
-                            printf '\033[31mUsername must be between 2 and 32 characters long\033[0m';
-                        else 
-                            break;
-                        fi
-                    else
-                        printf '\033[31mUsername must only contain alphanumeric characters\033[0m';
-                    fi
-                esac
-            done
-            #Password
-            while true; do
-                read -p "$(printf '\033[33mEnter password: \033[0m')" pppw
-                case $pppw in
-                    "" ) 
-                        printf '\033[31mCannot be empty!\033[0m';;
-                    * )  
-                    if [ ${#pppw} -le 1 ]  || [ ${#pppw} -ge 33 ] ; then
-                        printf '\033[31mPassword must be between 2 and 32 characters long\033[0m';
-                    else 
-                        break;
-                    fi
-                esac
-            done
-            printf '\033[36mUsing custom settings\r\n\r\nUsername: \033[33m'$pppusr'\r\n\033[36mPassword: \033[33m'$pppw'\r\n\r\n\033[0m'
-            break;;
-        [Nn])
-            printf '\033[36mUsing default settings\033[0m'
-            pppusr="ppp"
-            pppw="ppp"
-            break;;
-        *)
-            echo "Please enter Y or N."
-            ;;
-        esac
-        done
+        printf '\033[36mUsing default settings\033[0m'
+        pppusr="ppp"
+        pppw="ppp"
         echo ''$pppusr'  *  '$pppw'  '$ps4ip'' > /etc/ppp/chap-secrets
         echo 'guest  *  '$pppw'  '$guestip'' >> /etc/ppp/chap-secrets
 
@@ -693,360 +591,51 @@ while true; do
 done
 
 # Run on startup
-while true; do
-    read -p "$(printf '\r\n\r\n\033[36mDo you want to run PPPwn on startup? (Recommended) (Y/N):\033[0m ')" run_on_startup
-    case "$run_on_startup" in
-    [Yy])
-        echo -e "sleep 20\nchmod +x ${ppwnpath}/run.sh && ${ppwnpath}/run.sh" > /etc/rc.local
-        printf '\033[32mPPPwn will be loaded on startup\033[0m'
-        startup=true
-        break;;
-    [Nn])
-        printf '\033[32mPPPwn will NOT be loaded on startup\033[0m'
-        startup=false
-        break;;
-    *)
-        echo "Please enter Y or N."
-        ;;
-    esac
-done
+echo -e "sleep 20\nchmod +x ${ppwnpath}/run.sh && ${ppwnpath}/run.sh" > /etc/rc.local
+printf '\033[32mPPPwn will be loaded on startup\033[0m'
+startup=true
 
 
 # Dtlink
 echo
-while true; do
-    read -p "$(printf '\r\n\r\n\033[36mDo you want to detect a console shutdown and relaunch PPPwn? (Recommended) (Y/N):\033[0m ')" dtlink
-    case "$dtlink" in
-        [Yy])
-            dtl="true"
-            dtlan=$(sed -n '1p' lan_ports.txt | tr -d "'\"")
-            rm -r lan_ports.txt
-            printf '\033[32mDevice will attempt to detect console shutdown\033[0m'
-            break;;
-        [Nn])
-            dtl="false"
-            printf '\033[32mDevice will NOT attempt to detect console shutdown\033[0m'
-            break;;
-        *)
-            echo "Please enter Y or N."
-            ;;
-    esac
-done
+
+dtl="true"
+dtlan=$(sed -n '1p' lan_ports.txt | tr -d "'\"")
+rm -r lan_ports.txt
+printf '\033[32mDevice will attempt to detect console shutdown\033[0m'
 
 # GoldHEN Detection
 AVAILABLE_MB=$(df -m "$TARGET_DIR" | awk 'NR==2 {print $4}')
 echo
-echo -e "\r\n\r\n${AVAILABLE_MB}MB available."
-if [ "$AVAILABLE_MB" -lt "$THRESHOLD_MB" ]; then
-    printf "\033[31mWARNING: \033[0mYou have less than the recommended storage capacity available."
-    echo "To preserve space, do not enable additional options like the web panel and GoldHEN detection."
-fi
-while true; do
-    read -p "$(printf '\r\n\r\n\033[36mEnable GoldHEN detection for rest mode support? (Y/N):\033[0m ')" ghcheck
-    case "$ghcheck" in
-        [Yy])
-            opkg install nmap
-            ghd="true"
-            printf '\033[32mGoldhen detection enabled\033[0m'
-            break;;
-        [Nn])
-            ghd="false"
-            printf '\033[32mGoldhen detection disabled\033[0m'
-            break;;
-        *)
-            echo "Please enter Y or N."
-            ;;
-    esac
-done
+ghd="false"
+printf '\033[32mGoldhen detection disabled\033[0m'
 
 
 # Shutdown after
 echo
-while true; do
-    read -p "$(printf '\r\n\r\n\033[36mDo you want to power down the router after PPPwn loads successfully? (Y/N):\033[0m ')" shutdown
-    case "$shutdown" in
-        [Yy])
-            echo ""
-            printf '\033[31mWARNING If anything is misconfigured then enabling this feature along with run on startup could cause a boot loop\n\033[0m'
-            while true; do
-                read -p  "Are you sure you want to enable this feature? (Y/N): " bootloop
-                case "$bootloop" in
-                    [Yy])
-                        printf '\033[32mDevice will shutdown after PPPwn\033[0m'
-                        echo "poweroff" >> run.sh
-                        break;;
-                    [Nn])
-                        printf '\033[32mDevice will NOT shutdown after PPPwn\033[0m'
-                        break;;
-                    *)
-                        echo "Please enter Y or N."
-                        ;;
-                esac
-            done
-            ;;
-        [Nn])
-            printf '\033[32mDevice will NOT shutdown after PPPwn\033[0m'
-            break;;
-        *)
-            echo "Please enter Y or N."
-            ;;
-    esac
-done
+printf '\033[32mDevice will NOT shutdown after PPPwn\033[0m'
+
 
 # Web server
 AVAILABLE_MB=$(df -m "$TARGET_DIR" | awk 'NR==2 {print $4}')
 echo
-echo -e "\r\n\r\n${AVAILABLE_MB}MB available."
-if [ "$AVAILABLE_MB" -lt "$THRESHOLD_MB" ]; then
-    printf "\033[31mWARNING: \033[0mYou have less than the recommended storage capacity available."
-    echo "To preserve space, do not enable additional options like the web panel and GoldHEN detection."
-fi
-while true; do
-    read -p "$(printf '\r\n\r\n\033[36mWould you like to enable a web panel to load payloads & adjust settings? (Y/N):\033[0m ')" webpanel
-    case "$webpanel" in
-        [Yy])
+printf '\033[32mWeb Panel will NOT be used\033[0m'
 
-            # download web panel
-            wget https://github.com/MODDEDWARFARE/PPPwn_WRT/raw/main/index.php
-            if [ $? -ne 0 ]; then
-                echo "Failed to download index.php"
-                #exit 1
-            fi
-            wget https://github.com/MODDEDWARFARE/PPPwn_WRT/raw/main/pconfig.php
-            if [ $? -ne 0 ]; then
-                echo "Failed to download pconfig.php"
-                #exit 1
-            fi
-            wget https://github.com/MODDEDWARFARE/PPPwn_WRT/raw/main/network.php
-            if [ $? -ne 0 ]; then
-                echo "Failed to download network.php"
-                #exit 1
-            fi
-            wget https://github.com/MODDEDWARFARE/PPPwn_WRT/raw/main/payloads.php
-            if [ $? -ne 0 ]; then
-                echo "Failed to download payloads.php"
-                #exit 1
-            fi
-
-            #required pkgs
-            opkg install nginx php8-fastcgi php8-fpm
-
-            #configure nginx
-            echo 'user root;
-
-events {}
-
-http {
-
-    server {
-        listen 8080 default_server;
-        listen [::]:8080 default_server;
-        root '"${ppwnpath}"';
-        index index.html index.htm index.php;
-
-        server_name _;
-
-        location / {
-            try_files $uri $uri/ =404;
-        }
-
-        error_page 404 = @mainindex;
-        location @mainindex {
-            return 302 /;
-        }
-
-        location ~ \.php$ {
-            include fastcgi_params;
-            fastcgi_split_path_info ^(.+\.php)(/.+)$;
-            fastcgi_pass unix:/var/run/php8-fpm.sock;
-            fastcgi_index index.php;
-            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        }
-    }
-}
-
-            ' | tee /etc/nginx/uci.conf.template
-
-        #php permissions
-
-        CONFIG_FILE="/etc/php8-fpm.d/www.conf"
-        INIT_FILE="/etc/init.d/php8-fpm"
-        PHP_FILE="/etc/php.ini"
-
-        sed -i 's|^doc_root = "/www"|doc_root = "'"$ppwnpath"'"|' "$PHP_FILE"
-        sed -i 's/^user = nobody$/user = root/' "$CONFIG_FILE"
-        sed -i 's/service_start \$PROG -y \$CONFIG -g \$SERVICE_PID_FILE/service_start \$PROG -R -y \$CONFIG -g \$SERVICE_PID_FILE/' "$INIT_FILE"
-
-        if grep -q 'service_start \$PROG -R -y \$CONFIG -g \$SERVICE_PID_FILE' "$INIT_FILE"; then
-            echo "Successfully updated the php service"
-        else
-            echo "Failed to update the service"
-            exit 1
-        fi
-        printf '\033[32mWeb Panel will be accessible via pppwn.local:8080 or '"${gateway}"':8080\033[0m'
-            #install payloads
-            AVAILABLE_MB=$(df -m "$TARGET_DIR" | awk 'NR==2 {print $4}')
-            echo
-            echo -e "\r\n\r\n${AVAILABLE_MB}MB available."
-            if [ "$AVAILABLE_MB" -lt "$THRESHOLD_MB" ]; then
-                echo "WARNING: You have less than the recommended storage capacity available."
-                echo "To preserve space, do not enable additional options like the web panel and GoldHEN detection."
-            fi
-            while true; do
-                read -p "$(printf '\r\n\r\n\033[36mDownload bin loader payloads? (Y/N):\033[0m ')" payloads
-                case "$payloads" in
-                [Yy])        
-                    mkdir payloads
-                    wget --no-check-certificate -O PS4-Payloads.zip "https://github.com/EchoStretch/ps4-payload-sdk/releases/download/PS4-Payloads-1.018/PS4-Payloads.zip"
-                    if [ $? -ne 0 ]; then
-                        echo "Failed to download PS4-Payloads"
-                    fi
-                    opkg install unzip
-                    unzip -o PS4-Payloads.zip
-                    rm -f PS4-Payloads.zip
-                    break;;
-                [Nn])
-                    break;;
-                *)
-                    echo "Please enter Y or N."
-                    ;;
-                esac
-            done
-            break;;
-        [Nn])
-            printf '\033[32mWeb Panel will NOT be used\033[0m'
-            break;;
-        *)
-            echo "Please enter Y or N."
-            ;;
-    esac
-done
 
 # LuCi app commands
 AVAILABLE_MB=$(df -m "$TARGET_DIR" | awk 'NR==2 {print $4}')
 echo
-echo -e "\r\n\r\n${AVAILABLE_MB}MB available."
-if [ "$AVAILABLE_MB" -lt "$THRESHOLD_MB" ]; then
-    printf "\033[31mWARNING: \033[0mYou have less than the recommended storage capacity available."
-    echo "To preserve space, do not attempt to install the payloads"
-fi
-while true; do
-    read -p "$(printf '\r\n\r\n\033[36mDo you also want to run PPPwn from the LuCi web interface? (Y/N):\033[0m ')" app_commands
-    case "$app_commands" in
-        [Yy])
-            opkg install luci-app-commands
-            if [ $? -ne 0 ]; then
-                echo "Failed to install luci-app-commands"
-                #exit 1
-            fi
-            echo -e "\nconfig command\n    option name 'PPPwn PS4'\n    option command '${ppwnpath}/run.sh'" | tee -a /etc/config/luci > /dev/null
-            printf '\033[32mPPPwn will be accessible from the web interface\033[0m'
-            break;;
-        [Nn])
-            printf '\033[32mPPPwn will not be accessible from the web interface\033[0m'
-            break;;
-        *)
-            echo "Please enter Y or N."
-            ;;
-    esac
-done
+printf '\033[32mPPPwn will not be accessible from the web interface\033[0m'
 
 #LED
 echo
-while true; do
-    read -p "$(printf '\r\n\r\n\033[36mDo you want to use the devices LED(s) to indicate when PPPwn is running? (Y/N): \033[0m ')" activeled
-    case "$activeled" in
-        [Yy])
-            echo
-            echo "Available LED options:"
-            count=1
-            > led_list.tmp
-            for led in $(ls /sys/class/leds); do
-                echo "$count: $led"
-                echo "$led" >> led_list.tmp
-                count=$((count + 1))
-            done
-            echo "$count: none"
-            echo "none" >> led_list.tmp
-            count=$((count + 1))
-            echo
-
-            while true; do
-                read -p "$(printf '\r\n\r\n\033[36mEnter the number corresponding to the LED you want to select: \033[0m ')" choice
-
-                if [ "$choice" -ge 1 ] 2>/dev/null && [ "$choice" -lt "$count" ]; then
-                    led_info=$(sed -n "${choice}p" led_list.tmp)
-                    echo -e "${led_info} \033[32mwill be used \033[0m"
-                    break
-                else
-                    printf "Invalid selection. Please enter a number between 1 and $((count - 1))."
-                fi
-            done
-            rm -f led_list.tmp
-            break;;
-        [Nn])
-            led_info="none"
-            echo -e '\033[32mLED Disabled\033[0m'
-            break;;
-        *)
-            echo "Please enter Y or N."
-            ;;
-    esac
-done
+led_info="none"
+echo -e '\033[32mLED Disabled\033[0m'
 
 #rc.button
 cp -r /etc/rc.button rc.button
 echo
-while true; do
-    read -p "$(printf '\r\n\r\n\033[36mDo you want the option to load PPPwn by pressing a button on your device? (Y/N): \033[0m ')" btnpromt
-    case "$btnpromt" in
-        [Yy])
-
-            echo
-            echo "Available buttons:"
-            count=1
-            > btn_list.tmp
-            for btn in $(ls /etc/rc.button); do
-                echo "$count: $btn"
-                echo "$btn" >> btn_list.tmp
-                count=$((count + 1))
-            done
-            echo "$count: none"
-            echo "none" >> btn_list.tmp
-            count=$((count + 1))
-            echo
-
-            while true; do
-                read -p "$(printf '\r\n\r\n\033[36mSelect a button on your device to overwrite (Enter number): \033[0m ')" choice
-
-                if [ "$choice" -ge 1 ] 2>/dev/null && [ "$choice" -lt "$count" ]; then
-                    btn_info=$(sed -n "${choice}p" btn_list.tmp)
-                    printf "$btn_info \033[32mwill be used\033[0m"
-                    break
-                else
-                    printf "Invalid selection. Please enter a number between 1 and $((count - 1))."
-                fi
-            done
-
-            rm -f btn_list.tmp
-
-            INPUT_FILE="/etc/rc.button/${btn_info}"
-            echo '#!/bin/sh
-
-        if [ "$ACTION" = "released" ] && [ "$BUTTON" = "'$btn_info'" ]; then
-            chmod +x ' $ppwnpath'/run.sh && '$ppwnpath'/run.sh
-        fi
-
-        return 0' > /etc/rc.button/${btn_info}
-            break;;
-        [Nn])
-            printf '\033[32mButton Disabled\033[0m'
-            break;;
-        *)
-            echo "Please enter Y or N."
-            ;;
-    esac
-done
+printf '\033[32mButton Disabled\033[0m'
 
 # DNS config
 CONFIG_FILE="/etc/config/dhcp"

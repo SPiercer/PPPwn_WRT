@@ -51,7 +51,7 @@ Pass: yourpassword
 
 Download and run the install script
 ```sh
-wget https://github.com/MODDEDWARFARE/PPPwn_WRT/raw/main/install.sh
+wget https://github.com/SPiercer/PPPwn_WRT/raw/main/install.sh
 chmod +x install.sh && . ./install.sh
 ```
 
@@ -94,32 +94,11 @@ You will be asked a series of configuration questions:
   - **Yes**: PS4 gets internet access post-jailbreak.  
   - **No**: Firewall rules block internet but allow local network access.
 
-- **Enable Web Panel (Recommended):**  
-  Access via your device’s IP at port 8080 or `http://pppwn.local:8080` from the PS4 browser. Allows control over settings, PPPwn, and payloads.
-
-- **Install Bin Loader Payloads:**  
-  Optional. Allows loading payloads via web panel. Not recommended for low-storage devices.
-
-- **Enable from LuCI Web Interface:**  
-  Adds a custom command in LuCI under **System > Custom Commands**. Not advised for devices with limited storage.
-
 - **Detect Console Shutdown:**  
   Allows auto-reload of PPPwn when the console reboots.
 
-- **Enable GoldHEN Detection:**  
-  Prevents PPPwn from reloading after rest mode if GoldHEN is already running. Avoid on low-storage devices.
-
-- **Activity LED Indicator:**  
-  Select an LED to blink while PPPwn is running.
-
-- **Physical Button Trigger:**  
-  Choose a device button (e.g., `wps`) to manually run PPPwn.
-
 - **Run PPPwn on Startup:**  
   Automatically launches PPPwn when the device boots.
-
-- **Shutdown After PPPwn Loads:**  
-  Optional and risky. Powers down the device after PPPwn completes. Can cause reboot loops or failure if setup is incomplete. Only use if powering from the PS4's USB.
 
 Once installation completes, your device will reboot.
 
@@ -152,12 +131,6 @@ Once installation completes, your device will reboot.
      ```bash
      cd PPPwn_WRT-main && ./run.sh
      ```
-   - Web Panel:  
-     Open `http://pppwn.local:8080` > click **Restart PPPwn**
-   - LuCI:  
-     **System > Custom Commands > PPPwn PS4 > Run**
-   - Device Button:  
-     Press the selected button (e.g., `wps`)
 
 ---
 
