@@ -11,11 +11,7 @@ Based on the Pi-Pwn project from [stooged](https://github.com/stooged/PI-Pwn).
 - DNS Blockers to prevent system updates when connected to the internet  
 - Autolaunch PPPwn after the PS4 reboots  
 - Detect GoldHEN to prevent relaunching PPPwn when recovering from rest mode  
-- Web Panel for loading payloads, adjusting settings & restarting PPPwn  
 - Connect additional devices over PPPoE to access the PS4 over the network  
-- Option to use a button on your device to load PPPwn  
-- Option to load PPPwn from the LuCI web interface  
-- Activity LED can be enabled to indicate when PPPwn is running  
 
 ---
 
